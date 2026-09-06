@@ -1,6 +1,8 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { AuthGate } from '@/components/auth-gate'
+import { signOut, useSession } from '@/lib/auth-client'
 import {
   ArrowRight,
   Bell,
@@ -27,6 +29,7 @@ import {
   Users,
   X,
   Zap,
+  BarChart as BarChartIcon,
 } from 'lucide-react'
 import {
   Area,
@@ -111,8 +114,9 @@ function Admin() { const [uploaded, setUploaded] = useState(false); return <div 
 
 export default function Page() {
   const [view, setView] = useState('dashboard'); const [mobileNav, setMobileNav] = useState(false);
+  const { data: session } = useSession();
   const current = navItems.find((item) => item.id === view) ?? navItems[0];
   const content = useMemo(() => { if(view === 'assessment') return <Assessment setView={setView}/>; if(view === 'competency') return <Competency setView={setView}/>; if(view === 'learning') return <Learning setView={setView}/>; if(view === 'quiz') return <Quiz setView={setView}/>; if(view === 'results') return <Results/>; if(view === 'admin') return <Admin/>; return <Dashboard setView={setView}/> }, [view]);
-  return <main className="app-shell"><aside className={`sidebar ${mobileNav ? 'open' : ''}`}><div className="brand"><div className="brand-mark"><BarChart size={20}/></div><div><strong>Samarth</strong><span>Competency platform</span></div><button className="mobile-close" onClick={() => setMobileNav(false)}><X size={18}/></button></div><div className="sidebar-section"><span className="sidebar-label">Workspace</span>{navItems.map(({id,label,icon: Icon}) => <button key={id} className={`nav-item ${view === id ? 'active' : ''}`} onClick={() => {setView(id);setMobileNav(false)}}><Icon size={18}/><span>{label}</span>{id === 'assessment' && <span className="nav-dot"/>}</button>)}</div><div className="sidebar-bottom"><div className="help-card"><Sparkles size={18}/><strong>AI coach is ready</strong><span>Get a personalised next step.</span><button onClick={() => setView('learning')}>View plan <ArrowRight size={14}/></button></div><button className="nav-item"><Settings2 size={18}/><span>Settings</span></button><div className="user-mini"><div className="avatar">PS</div><div><strong>Priya Sharma</strong><span>Analyst · MoSPI</span></div><ChevronDown size={15}/></div></div></aside><div className="main-column"><header className="topbar"><button className="mobile-menu" onClick={() => setMobileNav(true)}><Menu size={20}/></button><div className="breadcrumb"><span>Workspace</span><span>/</span><strong>{current.label}</strong></div><div className="top-actions"><button className="search-button"><Search size={17}/><span>Search anything</span><kbd>⌘ K</kbd></button><button className="icon-button notification"><Bell size={19}/><span/></button><div className="avatar top-avatar">PS</div></div></header><div className="content-area">{content}</div></div></main>
+  return <AuthGate><main className="app-shell"><aside className={`sidebar ${mobileNav ? 'open' : ''}`}><div className="brand"><div className="brand-mark"><BarChartIcon size={20}/></div><div><strong>Samarth</strong><span>Competency platform</span></div><button className="mobile-close" onClick={() => setMobileNav(false)}><X size={18}/></button></div><div className="sidebar-section"><span className="sidebar-label">Workspace</span>{navItems.map(({id,label,icon: Icon}) => <button key={id} className={`nav-item ${view === id ? 'active' : ''}`} onClick={() => {setView(id);setMobileNav(false)}}><Icon size={18}/><span>{label}</span>{id === 'assessment' && <span className="nav-dot"/>}</button>)}</div><div className="sidebar-bottom"><div className="help-card"><Sparkles size={18}/><strong>AI coach is ready</strong><span>Get a personalised next step.</span><button onClick={() => setView('learning')}>View plan <ArrowRight size={14}/></button></div><button className="nav-item"><Settings2 size={18}/><span>Settings</span></button><div className="user-mini"><div className="avatar">{session?.user.name?.slice(0, 2).toUpperCase() ?? 'U'}</div><div><strong>{session?.user.name ?? 'Learner'}</strong><span>{session?.user.email ?? 'Personal workspace'}</span></div><button className="signout-btn" onClick={() => signOut()} aria-label="Sign out"><ChevronDown size={15}/></button></div></div></aside><div className="main-column"><header className="topbar"><button className="mobile-menu" onClick={() => setMobileNav(true)}><Menu size={20}/></button><div className="breadcrumb"><span>Workspace</span><span>/</span><strong>{current.label}</strong></div><div className="top-actions"><button className="search-button"><Search size={17}/><span>Search anything</span><kbd>⌘ K</kbd></button><button className="icon-button notification"><Bell size={19}/><span/></button><div className="avatar top-avatar">PS</div></div></header><div className="content-area">{content}</div></div></main></AuthGate>
 }
 
